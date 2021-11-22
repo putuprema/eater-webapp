@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Blazored.LocalStorage" Version="4.1.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.0" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+		<PackageReference Include="MudBlazor" Version="6.0.2" />
+		<PackageReference Include="Refit" Version="6.1.15" />
+		<PackageReference Include="Refit.HttpClientFactory" Version="6.1.15" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="MudBlazor" />
+		<Using Include="MudBlazor.Services" />
+		<Using Include="EaterWebClient.Models" />
+		<Using Include="EaterWebClient.ApiClients" />
+		<Using Include="EaterWebClient.Exceptions" />
+		<Using Include="EaterWebClient.Interfaces" />
+		<Using Include="EaterWebClient.Services" />
+		<Using Include="EaterWebClient.ViewModels" />
+		<Using Include="EaterWebClient.Extensions" />
+		<Using Include="Refit" />
+	</ItemGroup>
+
+</Project>

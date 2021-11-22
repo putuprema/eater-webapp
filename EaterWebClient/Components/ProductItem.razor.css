@@ -1,0 +1,12 @@
+﻿.product-item {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+    .product-info-container {
+        display: grid;
+        grid-template-columns: 1fr 80px;
+        align-items: center;
+    }

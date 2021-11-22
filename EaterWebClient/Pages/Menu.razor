@@ -1,0 +1,67 @@
+﻿@page "/menu";
+@implements IDisposable
+@inject ITableService TableService;
+@inject IProductService ProductService;
+@inject IOrderService OrderService;
+@inject NavigationManager NavigationManager;
+
+<PageTitle>Eater - Menu</PageTitle>
+
+<MudAppBar>
+    <div>
+        <MudText Typo="Typo.h6" Align="Align.Center">Eater</MudText>
+    </div>
+</MudAppBar>
+
+<div class="content">
+    @if (loading)
+    {
+        <MudAlert Severity="Severity.Info">Loading Menus...</MudAlert>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+    }
+    else
+    {
+        <pre class="mb-5">@JsonSerializer.Serialize(OrderService.Items, options: new JsonSerializerOptions { WriteIndented = true })</pre>
+        @foreach(var item in featuredProductGroups)
+        {
+            <FeaturedProductsGroup @key="item.Category.Id" Category="item.Category" Products="item.Products" />
+        }
+    }
+</div>
+
+@code {
+    private bool loading = true;
+    private string? errorMessage;
+    private List<FeaturedProducts> featuredProductGroups = new List<FeaturedProducts>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        OrderService.PropertyChanged += OnCartItemsChangedHandler;
+
+        try
+        {
+            featuredProductGroups = await ProductService.GetFeaturedProductsAsync();
+        }
+        catch (EaterApiException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async void OnCartItemsChangedHandler(object? sender, PropertyChangedEventArgs e)
+    {
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    public void Dispose()
+    {
+        OrderService.PropertyChanged -= OnCartItemsChangedHandler;
+    }
+}

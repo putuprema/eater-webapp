@@ -1,0 +1,27 @@
+﻿<div class="mb-4">
+    <MudText Typo="Typo.h6" Color="Color.Primary"><strong>@Category.Name</strong></MudText>
+    <div class="group-header-divider"></div>
+    <div>
+        @foreach(var (index, product) in Products.Select((prod, idx) => (idx, prod)))
+        {
+            <ProductItem 
+                @key="product.Id"
+                Id="@product.Id"
+                Name="@product.Name"
+                Description="@product.Description"
+                Price="@product.Price"
+                ImageUrl="@product.ImageUrl"
+                Enabled="@product.Enabled"
+            />
+            @if (index != Products.Count - 1)
+            {
+                <div class="product-item-divider"></div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public ProductCategory Category { get; set; } = null!;
+    [Parameter] public List<Product> Products { get; set; } = null!;
+}
