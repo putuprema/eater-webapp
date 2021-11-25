@@ -1,9 +1,5 @@
-﻿@page "/menu";
-@implements IDisposable
-@inject ITableService TableService;
-@inject IProductService ProductService;
-@inject IOrderService OrderService;
-@inject NavigationManager NavigationManager;
+﻿@page "/menu"
+@inject MenuViewModel _menuViewModel
 
 <PageTitle>Eater - Menu</PageTitle>
 
@@ -14,54 +10,28 @@
 </MudAppBar>
 
 <div class="content">
-    @if (loading)
+    @if (_menuViewModel.Loading)
     {
-        <MudAlert Severity="Severity.Info">Loading Menus...</MudAlert>
+        <LoadingSpinner Text="Loading Menus..." />
     }
-    else if (!string.IsNullOrEmpty(errorMessage))
+    else if (!string.IsNullOrEmpty(_menuViewModel.ErrorMessage))
     {
-        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+        <MudAlert Severity="Severity.Error">@_menuViewModel.ErrorMessage</MudAlert>
     }
     else
     {
-        <pre class="mb-5">@JsonSerializer.Serialize(OrderService.Items, options: new JsonSerializerOptions { WriteIndented = true })</pre>
-        @foreach(var item in featuredProductGroups)
+        @foreach(var item in _menuViewModel.FeaturedProductsGroup)
         {
             <FeaturedProductsGroup @key="item.Category.Id" Category="item.Category" Products="item.Products" />
         }
     }
 </div>
 
-@code {
-    private bool loading = true;
-    private string? errorMessage;
-    private List<FeaturedProducts> featuredProductGroups = new List<FeaturedProducts>();
+<ConfirmOrderFab />
 
+@code {
     protected override async Task OnInitializedAsync()
     {
-        OrderService.PropertyChanged += OnCartItemsChangedHandler;
-
-        try
-        {
-            featuredProductGroups = await ProductService.GetFeaturedProductsAsync();
-        }
-        catch (EaterApiException ex)
-        {
-            errorMessage = ex.Message;
-        }
-        finally
-        {
-            loading = false;
-        }
-    }
-
-    private async void OnCartItemsChangedHandler(object? sender, PropertyChangedEventArgs e)
-    {
-        await InvokeAsync(() => StateHasChanged());
-    }
-
-    public void Dispose()
-    {
-        OrderService.PropertyChanged -= OnCartItemsChangedHandler;
+        await _menuViewModel.GetFeaturedProductsAsync();
     }
 }

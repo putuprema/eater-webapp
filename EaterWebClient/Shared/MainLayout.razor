@@ -1,22 +1,19 @@
 ﻿@inherits LayoutComponentBase
 @using System.ComponentModel
-@inject AppViewModel AppViewModel
-@inject NavigationManager NavigationManager
+@inject AppViewModel _appViewModel
+@inject NavigationManager _navigationManager
 
 <MudThemeProvider Theme="EaterTheme" />
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
 <MudLayout>
-    <CascadingValue Value="@AppViewModel">
-        @if (AppViewModel.Loading)
+    <CascadingValue Value="@_appViewModel">
+        @if (_appViewModel.Loading)
         {
-            <div class="d-flex flex-column align-center justify-center" style="width: 100%; height: 100vh;">
-                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
-                <p class="mt-5">Please wait...</p>
-            </div>
+            <LoadingSpinner />
         }
-        else if (AppViewModel.CurrentTable == null)
+        else if (_appViewModel.CurrentTable == null)
         {
             <p>Table not found</p>
         }
@@ -36,14 +33,15 @@
         {
             Primary = "rgb(12, 89, 160)",
             AppbarBackground = "rgb(12, 89, 160)"
+        },
+        LayoutProperties = new()
+        {
+            DefaultBorderRadius = "20px"
         }
     };
 
     protected override async Task OnInitializedAsync()
     {
-        if (NavigationManager.TryGetQueryString("tableId", out string? tableId)) 
-        {
-            await AppViewModel.FetchTableInfoAsync(tableId!);
-        }
+        await _appViewModel.InitializeAsync();
     }
 }

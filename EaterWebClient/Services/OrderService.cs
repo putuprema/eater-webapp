@@ -1,23 +1,19 @@
-﻿using System.ComponentModel;
-
-namespace EaterWebClient.Services
+﻿namespace EaterWebClient.Services
 {
     public class OrderService : IOrderService
     {
         public IDictionary<string, OrderItem> Items { get; } = new Dictionary<string, OrderItem>();
+        public Action? OnOrderItemsChanged { get; set; }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public void AddItemToCart(string productId, int quantity)
+        public void AddItemToCart(Product product, int quantity)
         {
-            if (!Items.TryGetValue(productId, out OrderItem? orderItem))
+            if (!Items.TryGetValue(product.Id, out OrderItem? orderItem))
             {
-                orderItem = new OrderItem(productId, quantity, null);
+                orderItem = new OrderItem(product, quantity, null);
             }
 
             orderItem.Quantity = quantity;
-            Items.TryAdd(productId, orderItem);
-
+            Items.TryAdd(product.Id, orderItem);
             NotifyItemsChanged();
         }
 
@@ -29,7 +25,7 @@ namespace EaterWebClient.Services
 
         public void NotifyItemsChanged()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Items)));
+            OnOrderItemsChanged?.Invoke();
         }
     }
 }

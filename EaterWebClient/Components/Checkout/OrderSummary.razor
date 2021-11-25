@@ -1,0 +1,25 @@
+﻿@inject IOrderService _orderService
+
+<MudCard Elevation="3" Class="pa-4">
+    <MudText Typo="Typo.body1" Class="mb-4"><strong>Items</strong></MudText>
+
+    <div>
+        <Virtualize Items="_orderService.Items.Values" Context="item">
+            <OrderSummaryItem @key="item.Id" OrderItem="item" OnOrderItemQtyChanged="OnOrderItemQtyChanged" />
+        </Virtualize>
+    </div>
+</MudCard>
+
+@code {
+    void OnOrderItemQtyChanged(OrderItem item)
+    {
+        if (item.Quantity == 0)
+        {
+            _orderService.RemoveItemFromCart(item.Id);
+        }
+        else
+        {
+            _orderService.AddItemToCart(item.Product, item.Quantity);
+        }
+    }
+}

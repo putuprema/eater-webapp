@@ -1,0 +1,74 @@
+﻿@page "/auth"
+@inject IUserService _userService
+@inject NavigationManager _navigationManager
+@inject ISnackbar _snackbar;
+
+<PageTitle>Eater - Login</PageTitle>
+
+<MudAppBar>
+    <div>
+        <MudText Typo="Typo.h6" Align="Align.Center">Login to Eater</MudText>
+    </div>
+</MudAppBar>
+
+<div class="content">
+    <MudForm Model="@authTokenRequest" @ref="form">
+        <MudTextField @bind-Value="authTokenRequest.Email" Label="Email" Variant="Variant.Outlined" Class="mb-4" 
+            Validation="authTokenRequestValidator.ValidateValue" 
+            For="@(() => authTokenRequest.Email)"
+            Immediate="true" />
+
+        <MudTextField @bind-Value="authTokenRequest.Password" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password"
+            Validation="authTokenRequestValidator.ValidateValue" 
+            For="@(() => authTokenRequest.Password)"
+            Immediate="true" />
+    </MudForm>
+</div>
+
+<div class="fixed-bottom-container">
+    <MudButton Disabled="loading" Variant="Variant.Filled" Color="Color.Primary" FullWidth OnClick="OnLoginBtnClicked">
+        @if (loading) 
+        {
+            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+            <MudText Class="ms-2">Logging in</MudText>
+        }
+        else
+        {
+            <MudText Class="ms-2">Login</MudText>
+        }
+    </MudButton>
+</div>
+
+@code {
+    MudForm form = null!;
+    AuthTokenRequest authTokenRequest = new AuthTokenRequest();
+    AuthTokenRequestValidator authTokenRequestValidator = new AuthTokenRequestValidator();
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? RedirectTo { get; set; }
+
+    bool loading = false;
+
+    async Task OnLoginBtnClicked()
+    {
+        if (form.IsValid)
+        {
+            loading = true;
+
+            try
+            {
+                await _userService.AuthenticateAsync(authTokenRequest);
+                _navigationManager.NavigateTo(RedirectTo ?? "/", replace: true);
+            }
+            catch (EaterApiException ex)
+            {
+                _snackbar.Add(ex.Message, Severity.Error);
+            }
+            finally
+            {
+                loading = false;
+            }
+        }
+    }
+}

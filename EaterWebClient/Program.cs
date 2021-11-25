@@ -1,6 +1,9 @@
+using Blazored.LocalStorage;
+using Blazored.SessionStorage;
 using EaterWebClient;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,6 +11,19 @@ using System.Text.Json.Serialization;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
+
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomCenter;
+    config.SnackbarConfiguration.MaximumOpacity = 100;
+    config.SnackbarConfiguration.VisibleStateDuration = 3000;
+    config.SnackbarConfiguration.HideTransitionDuration = 500;
+    config.SnackbarConfiguration.ShowTransitionDuration = 500;
+    config.SnackbarConfiguration.ClearAfterNavigation = true;
+});
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddBlazoredSessionStorage();
+builder.Services.AddTransient<AuthHeaderHandler>();
 
 builder.Services.AddRefitClient<IEaterApiClient>(
     settings: new RefitSettings
@@ -28,11 +44,23 @@ builder.Services.AddRefitClient<IEaterApiClient>(
                 try
                 {
                     var errorResponse = await httpResponseMessage.Content.ReadFromJsonAsync<BaseResponse>();
-                    errorMessage = errorResponse?.Message ?? "Unknown error occured. Please try again in a few minutes";
+                    errorMessage = errorResponse?.Message;
                 }
                 catch (Exception)
                 {
-                    errorMessage = "Unknown error occured. Please try again in a few minutes";
+                }
+                finally
+                {
+                    if (string.IsNullOrEmpty(errorMessage))
+                    {
+                        errorMessage = httpResponseMessage.StatusCode switch
+                        {
+                            HttpStatusCode.Unauthorized => "Please check your credentials",
+                            HttpStatusCode.NotFound => "Item not found",
+                            HttpStatusCode.BadRequest => "Bad request",
+                            _ => "Unknown error occured. Please try again in a few minutes"
+                        };
+                    }
                 }
                 return new EaterApiException(httpResponseMessage.StatusCode, errorMessage);
             }
@@ -42,11 +70,12 @@ builder.Services.AddRefitClient<IEaterApiClient>(
     .ConfigureHttpClient(httpClient =>
     {
         httpClient.BaseAddress = new Uri("https://eaterapigwap01.azure-api.net");
-    });
+    })
+    .AddHttpMessageHandler<AuthHeaderHandler>();
 
-builder.Services.AddMudServices();
-
-builder.Services.AddSingleton<AppViewModel>();
+builder.Services.AddTransient<AppViewModel>();
+builder.Services.AddTransient<MenuViewModel>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<ITableService, TableService>();
 builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddSingleton<IOrderService, OrderService>();

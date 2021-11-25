@@ -1,0 +1,9 @@
+﻿<div class="loading-spinner @(FullScreen ? "fullscreen": "")">
+    <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    <p class="mt-5">@Text</p>
+</div>
+
+@code {
+    [Parameter] public string Text { get; set; } = "Please wait...";
+    [Parameter] public bool FullScreen { get; set; } = true;
+}

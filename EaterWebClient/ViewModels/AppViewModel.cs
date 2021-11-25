@@ -1,37 +1,57 @@
-﻿namespace EaterWebClient.ViewModels
+﻿using Blazored.SessionStorage;
+using Microsoft.AspNetCore.Components;
+
+namespace EaterWebClient.ViewModels
 {
     public class AppViewModel : BaseViewModel
     {
-        private string? _errorMessage;
-        public string? ErrorMessage
-        {
-            get => _errorMessage;
-            set => SetValue(ref _errorMessage, value);
-        }
-
-        private Table? _currentTable;
-        public Table? CurrentTable
-        {
-            get => _currentTable;
-            private set => SetValue(ref _currentTable, value);
-        }
-
         private readonly ITableService _tableService;
+        private readonly IUserService _userService;
+        private readonly NavigationManager _navigationManager;
+        private readonly ISessionStorageService _sessionStorage;
 
-        public AppViewModel(ITableService tableService)
+        public string? ErrorMessage { get; set; }
+        public Table? CurrentTable { get; set; }
+
+        public AppViewModel(ITableService tableService, IUserService userService, NavigationManager navigationManager, ISessionStorageService sessionStorage)
         {
             _tableService = tableService;
+            _userService = userService;
+            _navigationManager = navigationManager;
+            _sessionStorage = sessionStorage;
         }
 
-        public async Task FetchTableInfoAsync(string tableId)
+        public async Task InitializeAsync()
         {
-            if (_currentTable == null)
+            Loading = true;
+
+            Task<Table?> getTableTask = Task.FromResult<Table?>(null);
+
+            if (!_navigationManager.TryGetQueryString("tableId", out string? tableId))
             {
-                
-                Loading = true;
-                CurrentTable = await _tableService.GetTableAsync(tableId);
-                Loading = false;
+                tableId = await _sessionStorage.GetItemAsync<string>(LocalStorageKeys.TableId);
             }
+
+            if (!string.IsNullOrEmpty(tableId))
+            {
+                getTableTask = _tableService.GetTableAsync(tableId!);
+            }
+
+            var getIdentityTask = _userService.GetIdentityAsync();
+            await Task.WhenAll(getTableTask, getIdentityTask);
+
+            CurrentTable = await getTableTask;
+            
+            if (CurrentTable != null)
+            {
+                await _sessionStorage.SetItemAsync(LocalStorageKeys.TableId, CurrentTable.Id);
+            }
+            else
+            {
+                _navigationManager.NavigateTo("/");
+            }
+
+            Loading = false;
         }
     }
 }

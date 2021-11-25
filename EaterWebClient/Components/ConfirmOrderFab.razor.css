@@ -1,0 +1,8 @@
+﻿.confirm-order-fab-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 2rem 1.2rem;
+    background: linear-gradient(0deg, rgba(255,255,255,1) 65%, rgba(255,255,255,0) 100%);
+}

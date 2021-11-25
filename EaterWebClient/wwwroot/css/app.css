@@ -27,7 +27,15 @@ a, .btn-link {
 }
 
 .content {
-    padding: 1.1rem;
+    padding: 1.2rem;
+}
+
+.fixed-bottom-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 2rem 1.2rem;
 }
 
 .valid.modified:not([type=checkbox]) {

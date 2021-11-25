@@ -1,0 +1,13 @@
+﻿.order-summary-item {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+    .product-info-container {
+        display: grid;
+        column-gap: 1.2rem;
+        grid-template-columns: 60px 1fr;
+        align-items: center;
+    }

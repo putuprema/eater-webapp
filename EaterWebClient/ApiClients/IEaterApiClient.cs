@@ -7,5 +7,14 @@
 
         [Get("/v1/products/featured")]
         Task<List<FeaturedProducts>> GetFeaturedProductsAsync();
+
+        [Post("/v1/auth/token")]
+        Task<AuthResult> GetAuthTokenAsync(AuthTokenRequest request);
+
+        [Post("/v1/customer")]
+        Task RegisterUserAsync(RegisterRequest request);
+
+        [Get("/v1/me")]
+        Task<Account> GetIdentityAsync();
     }
 }

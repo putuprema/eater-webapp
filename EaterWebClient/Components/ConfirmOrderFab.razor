@@ -1,0 +1,39 @@
+﻿@implements IDisposable
+@inject IOrderService _orderService
+@inject IUserService _userService
+@inject NavigationManager _navigationManager
+
+@if (_orderService.Items.Count > 0)
+{
+    <div style="padding-bottom: 3rem;"></div>
+    <div class="confirm-order-fab-container">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth OnClick="OnClick" EndIcon="@Icons.Material.Filled.KeyboardArrowRight">@_orderService.Items.Sum(i => i.Value.Quantity) Items Selected</MudButton>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _orderService.OnOrderItemsChanged += OnOrderItemsChanged;
+    }
+
+    private async void OnOrderItemsChanged() => await InvokeAsync(() => StateHasChanged());
+
+    void OnClick()
+    {
+        if (_userService.CurrentUser == null)
+        {
+            _navigationManager.NavigateTo("/auth?redirectTo=/checkout");
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/checkout");
+        }
+    }
+
+    public void Dispose()
+    {
+        _orderService.OnOrderItemsChanged -= OnOrderItemsChanged;
+    }
+}

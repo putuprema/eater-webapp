@@ -1,0 +1,35 @@
+﻿@using System.Globalization
+
+<div class="order-summary-item">
+    <div class="product-info-container">
+        <img src="@OrderItem.Product.ImageUrl" width="60" />
+        <div>
+            <MudText Typo="Typo.body1"><strong>@OrderItem.Product.Name</strong></MudText>
+            <MudText Typo="Typo.body2">Rp @OrderItem.Product.Price.ToString("N0", new NumberFormatInfo { NumberGroupSeparator = "." })</MudText>
+        </div>
+    </div>
+    <div class="mt-3 d-flex align-center">
+        <div class="d-flex align-center ml-auto">
+            <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" OnClick="DecrementQty"></MudIconButton>
+            <MudText Typo="Typo.body1" Color="Color.Primary" Class="mx-4"><strong>@OrderItem.Quantity</strong></MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" OnClick="IncrementQty"></MudIconButton>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public OrderItem OrderItem { get; set; } = null!;
+    [Parameter] public EventCallback<OrderItem> OnOrderItemQtyChanged { get; set; }
+
+    private async Task IncrementQty()
+    {
+        OrderItem.Quantity += 1;
+        await OnOrderItemQtyChanged.InvokeAsync(OrderItem);
+    }
+
+    private async Task DecrementQty()
+    {
+        OrderItem.Quantity -= 1;
+        await OnOrderItemQtyChanged.InvokeAsync(OrderItem);
+    }
+}
