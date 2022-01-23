@@ -73,11 +73,11 @@ builder.Services.AddRefitClient<IEaterApiClient>(
     })
     .AddHttpMessageHandler<AuthHeaderHandler>();
 
-builder.Services.AddTransient<AppViewModel>();
+builder.Services.AddScoped<AppViewModel>();
 builder.Services.AddTransient<MenuViewModel>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddSingleton<ITableService, TableService>();
-builder.Services.AddSingleton<IProductService, ProductService>();
-builder.Services.AddSingleton<IOrderService, OrderService>();
+builder.Services.AddScoped<ITableService, TableService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 await builder.Build().RunAsync();

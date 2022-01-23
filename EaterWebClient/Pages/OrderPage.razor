@@ -1,0 +1,76 @@
+﻿@page "/order/{orderId}"
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
+@inject IOrderService _orderService
+@inject NavigationManager _navigationManager
+@inject ILocalStorageService _localStorage
+
+<PageTitle>Eater</PageTitle>
+
+<MudAppBar>
+    <div>
+        <MudText Typo="Typo.h6" Align="Align.Center">Your Order</MudText>
+    </div>
+</MudAppBar>
+
+@if (loading || order?.Status == OrderStatus.VALIDATING)
+{
+    <LoadingSpinner Text="Validating your order..." />
+}
+else
+{
+    <pre>@JsonSerializer.Serialize(order, new JsonSerializerOptions { WriteIndented = true })</pre>
+}
+
+@code {
+    [Parameter] public string OrderId { get; set; } = null!;
+
+    private bool loading = true;
+    private HubConnection? hubConnection;
+    private Order? order;
+
+    protected override async Task OnInitializedAsync()
+    {
+        order = _orderService.ActiveOrder ?? await _orderService.GetOrderAsync(OrderId);
+
+        if (order == null)
+        {
+            _navigationManager.NavigateTo("/menu");
+        }
+        else
+        {
+            await ConnectSignalRAsync();
+        }
+
+        loading = false;
+    }
+
+    private async Task ConnectSignalRAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://eaterapigwap01.azure-api.net/v1/notifications/signalr", options =>
+            {
+                options.AccessTokenProvider = async () => await _localStorage.GetItemAsync<string>(LocalStorageKeys.AccessToken);
+            })
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<Order>("OrderStatusChanged", (order) => 
+        {
+            this.order = order;
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
+        await hubConnection.SendAsync("Subscribe", order.Id);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("Unsubscribe", order.Id);
+            await hubConnection.DisposeAsync();
+        }
+    }
+}

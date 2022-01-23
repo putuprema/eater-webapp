@@ -36,6 +36,7 @@ a, .btn-link {
     left: 0;
     width: 100%;
     padding: 2rem 1.2rem;
+    background: linear-gradient(0deg, rgba(255,255,255,1) 65%, rgba(255,255,255,0) 100%);
 }
 
 .valid.modified:not([type=checkbox]) {

@@ -1,0 +1,44 @@
+﻿@implements IDisposable
+@inject IOrderService _orderService
+
+<MudCard Elevation="2" Class="pa-4">
+    <MudText Typo="Typo.body1" Class="mb-4"><strong>Payment Summary</strong></MudText>
+
+    <div>
+        <Virtualize Items="_orderService.Items.Values" Context="item">
+            <div @key="item.Id" class="d-flex align-center">
+                <MudText Typo="Typo.body2" Class="mr-auto">@item.Name</MudText>
+                <MudText Typo="Typo.body2" Class="ml-auto" Align="Align.Right">Rp @((item.Price * item.Quantity).ToString("N0", new NumberFormatInfo { NumberGroupSeparator = "." }))</MudText>
+            </div>
+        </Virtualize>
+    </div>
+
+    <MudDivider Class="my-3" />
+
+    <div class="d-flex align-center">
+        <MudText Typo="Typo.body2" Class="mr-auto"><strong>Total payment</strong></MudText>
+        <MudText Typo="Typo.body2" Class="ml-auto" Align="Align.Right">
+            <strong>
+                Rp @((_orderService.Items.Values.Sum(item => item.Price * item.Quantity)).ToString("N0", new NumberFormatInfo { NumberGroupSeparator = "." }))
+            </strong>
+        </MudText>
+    </div>
+</MudCard>
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _orderService.OnOrderItemsChanged += OnOrderItemsChanged;
+    }
+
+    async void OnOrderItemsChanged()
+    {
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    public void Dispose()
+    {
+        _orderService.OnOrderItemsChanged -= OnOrderItemsChanged;
+    }
+}

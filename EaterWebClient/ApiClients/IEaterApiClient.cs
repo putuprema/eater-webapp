@@ -16,5 +16,11 @@
 
         [Get("/v1/me")]
         Task<Account> GetIdentityAsync();
+
+        [Post("/v1/order")]
+        Task<Order> PlaceOrderAsync(PlaceOrderRequest request);
+
+        [Get("/v1/order/{id}")]
+        Task<Order> GetOrderAsync(string id);
     }
 }

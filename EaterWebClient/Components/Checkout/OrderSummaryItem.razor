@@ -2,10 +2,10 @@
 
 <div class="order-summary-item">
     <div class="product-info-container">
-        <img src="@OrderItem.Product.ImageUrl" width="60" />
+        <img src="@OrderItem.ImageUrl" width="60" />
         <div>
-            <MudText Typo="Typo.body1"><strong>@OrderItem.Product.Name</strong></MudText>
-            <MudText Typo="Typo.body2">Rp @OrderItem.Product.Price.ToString("N0", new NumberFormatInfo { NumberGroupSeparator = "." })</MudText>
+            <MudText Typo="Typo.body1"><strong>@OrderItem.Name</strong></MudText>
+            <MudText Typo="Typo.body2">Rp @OrderItem.Price.ToString("N0", new NumberFormatInfo { NumberGroupSeparator = "." })</MudText>
         </div>
     </div>
     <div class="mt-3 d-flex align-center">
